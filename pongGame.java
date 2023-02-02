@@ -1,3 +1,8 @@
+//NOT the most optimised in the world but I thought it was cool
+//run on processing
+
+
+
 final int SCREENX = 240;
 final int SCREENY = 340;
 final int PADDLEHEIGHT = 15;
