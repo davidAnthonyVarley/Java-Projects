@@ -1,0 +1,445 @@
+import java.util.Scanner;
+
+final int PADDLEHEIGHT = 15;
+final int PADDLEWIDTH = 50;
+final int MARGIN = 30;
+
+Scanner input;
+
+final int alienWidth = 28;
+final int alienHeight = 25;
+int BULLETWIDTH;
+int BULLETHEIGHT;
+
+
+Player human;
+Player[] alienArray;
+
+Bullet[] humanBullets;
+Bullet humanBullet;
+Bullet[] powerUps;
+
+int humanBulletSpeed;
+
+int numberOfHumanBullets;
+
+PImage myImage;
+PImage explosionImage;
+
+
+
+
+int humanXPosition;
+int humanYPosition;
+
+int spaceBetweenAliens;
+
+float alienSpeed;
+int alienBulletSpeed;
+
+int numberOfInvaders;
+int numberOfInvadersKilled;
+
+String powerUp;
+
+
+
+class Player{
+  public boolean displayAlien;
+  
+  public int alienXPosition;
+  public float alienYPosition;
+  
+  public int lowerAlienHeight;
+  public int moveAlienDownSmoothlyCount;
+  
+  public boolean goDown;
+  public boolean goRight;
+  public boolean goLeft;
+  
+  
+  
+  public void moveHuman() {
+    humanXPosition = mouseX - (PADDLEWIDTH/2);
+    noStroke();
+    fill(123, 50, 255);
+    rect(humanXPosition, humanYPosition, PADDLEWIDTH, PADDLEHEIGHT);
+  }
+  
+  
+  
+  public void moveAlien() {
+    
+    for (int i=0; i<alienArray.length;i++) {
+      //System.out.println('a');
+      if (alienArray[i].displayAlien) {
+
+      image(myImage, alienArray[i].alienXPosition, alienArray[i].alienYPosition + alienArray[i].lowerAlienHeight);
+      }
+      
+    if (alienArray[i].goDown==false) {
+      
+    if (alienArray[i].goRight) {
+      alienArray[i].alienXPosition+=alienSpeed;
+    }
+    else if (alienArray[i].goLeft) {
+      alienArray[i].alienXPosition-=alienSpeed;
+    }
+    }
+    
+    text("COMPUTER SPEED: " + alienSpeed+ " pixels per second", 1 * (width/4), MARGIN);
+  }
+ }
+  
+  public void travelDownwards( ) {//////////////////////////////////////////////////////////////////////
+    
+    //boolean finished = false;
+    for (int j =0; j<alienArray.length; j++) {
+      
+    if (alienArray[j].goDown) {
+    
+    if (alienArray[j].moveAlienDownSmoothlyCount>=15) {
+      alienArray[j].goDown = false;
+      alienArray[j].moveAlienDownSmoothlyCount = 0;
+      //finished = true;
+
+      //fill(255, 0, 0); rect(40, 40, 400, 400);
+      }
+    else {
+      alienArray[j].alienYPosition+=2;
+      alienArray[j].moveAlienDownSmoothlyCount++;
+      //alienArray[j].alienYPosition;
+      
+      
+    }
+    
+    }
+    }
+    
+  }
+  
+  
+  public void checkForCollisionWithWalls() {
+    boolean finished=false;
+    int j = 0;
+    
+    for (int i =(alienArray.length-1); i>=0 && !finished;i--, j++) {
+      
+    if (alienArray[i].alienXPosition >= (width-alienWidth)) {
+      alienArray[i].goRight=false;
+      alienArray[i].goLeft=true;
+      alienArray[i].goDown=true;
+      alienArray[i].alienXPosition--; 
+      //finished = true;
+    } else if ((alienArray[j].alienXPosition) <=0) {
+      //fill(255, 0, 0); rect(100, 100, 100, 100);
+      alienArray[j].goRight=true;
+      alienArray[j].goLeft=false;
+      alienArray[j].goDown=true;
+      alienArray[j].alienXPosition++;
+      //finished = true;
+      }
+    }
+}
+  
+  public void explode(int i, Bullet bullet) {
+    bullet.bulletXPosition = mouseX;
+    bullet.bulletYPosition = humanYPosition;
+    noStroke(); fill(255, 0, 0); ellipse(alienArray[i].alienXPosition + alienWidth/2, alienArray[i].alienYPosition + alienHeight/2, alienWidth, alienHeight);
+    if (numberOfInvaders==1) {
+          fill(255);
+          text("Human wins!", width/2, height/2);
+          }
+    bullet.decrementBulletYPosition = false;
+    
+    //noStroke(); fill(255, 240, 0); ellipse(alienXPosition, alienYPosition, alienWidth * (7/8), alienHeight*(7/8));
+    //image(explosionImage, alienXPosition, alienYPosition);
+    alienArray[i].displayAlien=false;
+  }
+  
+}
+
+class Bullet {
+  public int bulletXPosition;
+  public int bulletYPosition;
+  public boolean decrementBulletYPosition;
+  
+  public boolean incrementPowerUpYPosition;  
+  
+  void checkForColllisionWithAlien(Bullet bullet) {
+    
+    for (int i = 0; i<alienArray.length;i++) {
+    if (bullet.bulletYPosition > alienArray[i].alienYPosition && bullet.bulletYPosition < (alienArray[i].alienYPosition+alienHeight)) {
+        if (bullet.bulletXPosition >= (alienArray[i].alienXPosition) && bullet.bulletXPosition < (alienArray[i].alienXPosition+alienWidth)) {
+          
+          
+          if (alienArray[i].displayAlien) {
+          alienArray[i].explode(i, bullet);
+          int tmpYPos = int (alienArray[i].alienYPosition);
+          createPowerUp(alienArray[i].alienXPosition, tmpYPos);
+          bullet.decrementBulletYPosition = false;
+          alienArray[i].displayAlien = false;
+          
+          numberOfInvaders--;
+          numberOfInvadersKilled++;
+          alienSpeed+=0.5;
+          System.out.println(numberOfInvaders);
+          }
+        }
+      }
+    }
+  
+  }
+  
+  void moveBullet(Bullet bullet) {
+    
+   if (bullet.decrementBulletYPosition) {
+    bullet.bulletYPosition-=humanBulletSpeed;
+    noStroke(); 
+    if (numberOfInvadersKilled>7) {
+    fill(0, 204, 0);
+  } else if (numberOfInvadersKilled>2) {
+    fill(204, 0, 0);
+  } else if (numberOfInvadersKilled>2) {
+    fill(204, 204, 0); 
+  } else {
+    fill(255);
+  }
+    
+    rect(bullet.bulletXPosition, bullet.bulletYPosition, BULLETWIDTH, BULLETHEIGHT);
+    
+    
+    if (bullet.bulletYPosition<0 ) {
+      bullet.bulletXPosition = mouseX;
+      bullet.bulletYPosition = humanYPosition;
+      bullet.decrementBulletYPosition=false;
+      
+  }
+    
+    
+  }
+}
+
+  public void createPowerUp(int xpos, int ypos) {
+     if (numberOfInvadersKilled>7 && !powerUps[2].incrementPowerUpYPosition) {
+    powerUps[2].incrementPowerUpYPosition=true;
+    powerUps[2].bulletXPosition = xpos; 
+    powerUps[2].bulletYPosition = ypos;
+    
+  } else if (numberOfInvadersKilled>5 && !powerUps[1].incrementPowerUpYPosition) {
+    powerUps[1].incrementPowerUpYPosition=true;
+    powerUps[1].bulletXPosition = xpos; 
+    powerUps[1].bulletYPosition = ypos;
+    
+  } else if (numberOfInvadersKilled>2 && !powerUps[0].incrementPowerUpYPosition) {
+    powerUps[0].incrementPowerUpYPosition=true;
+    powerUps[0].bulletXPosition = xpos; 
+    powerUps[0].bulletYPosition = ypos;
+  }
+  
+
+    
+  }
+  
+  public void movePowerUp(int i) {
+    powerUps[i].bulletYPosition+=4;
+    
+    
+    noStroke(); 
+    if (numberOfInvadersKilled>7) {
+    fill(0, 204, 0);
+  } else if (numberOfInvadersKilled>5) {
+    fill(204, 0, 0);
+  } else if (numberOfInvadersKilled>2) {
+    fill(204, 204, 0); 
+  } else {
+    fill(255);
+  }
+
+    ellipse(powerUps[i].bulletXPosition, powerUps[i].bulletYPosition, alienWidth, alienHeight);
+    
+    
+  }
+  
+  public void checkForPowerUpCollisionWithHuman(int i) {
+    if ( humanYPosition < (powerUps[i].bulletYPosition + alienHeight) && (powerUps[i].bulletYPosition + alienHeight) < (humanYPosition+PADDLEHEIGHT) ) {
+      
+      if ( humanXPosition < powerUps[i].bulletXPosition && powerUps[i].bulletXPosition < (humanXPosition+PADDLEWIDTH) ) {
+       
+        
+      if (numberOfInvadersKilled>7) {
+      powerUp = "Double Bullets!";
+      makePowerUpDisappear(i);
+      
+    } else if (numberOfInvadersKilled>5) {
+      powerUp = "Bullet Speed Doubled!";
+      humanBulletSpeed=8;
+      makePowerUpDisappear(i);
+    } else if (numberOfInvadersKilled>2) {
+      powerUp = "Bullet Size Doubled!";
+      BULLETWIDTH=4;
+      BULLETHEIGHT=20;
+      makePowerUpDisappear(i);
+    } else {
+      powerUp = "None";
+    }
+        
+        
+      }
+    }
+    
+
+  }
+  
+  void makePowerUpDisappear(int i) {
+    powerUps[i].incrementPowerUpYPosition=false;
+    powerUps[i].bulletXPosition = width + 30; 
+    powerUps[i].bulletYPosition = height + 30;
+    
+  }
+  
+
+}
+
+
+
+
+
+
+
+
+void setup() {
+  size(800, 600);
+  myImage = loadImage("invader.gif");
+  //explosionImage = loadImage("explosing.gif");
+  
+  
+  human = new Player();
+  humanBullet= new Bullet();
+  humanBulletSpeed = 4;
+  
+  BULLETWIDTH = 2;
+  BULLETHEIGHT=10;
+  
+  spaceBetweenAliens = 20*2;
+  numberOfInvaders = 10;
+  numberOfInvadersKilled = 0;
+  
+  alienSpeed = 2 ;
+  numberOfHumanBullets = 15;
+  
+  alienArray = new Player[numberOfInvaders];
+  humanBullets = new Bullet[numberOfHumanBullets];
+  powerUps = new Bullet[3];
+  
+  for (int i =0; i<alienArray.length; i++) {
+    alienArray[i] = new Player();
+    alienArray[i].displayAlien = true;
+    
+    alienArray[i].moveAlienDownSmoothlyCount = 0;
+    alienArray[i].lowerAlienHeight = 0;
+    
+    alienArray[i].goLeft= false;
+    alienArray[i].goRight = true;
+    alienArray[i].goDown = false;
+    
+    alienArray[i].alienXPosition = width/8 + (i*spaceBetweenAliens);
+    alienArray[i].alienYPosition = height/8;
+  }
+
+  humanXPosition = mouseX;
+  humanYPosition = height-MARGIN;
+  
+  for (int i = 0; i<humanBullets.length;i++) {
+    humanBullets[i] = new Bullet();
+    humanBullets[i].bulletXPosition = mouseX;
+    humanBullets[i].bulletYPosition = humanYPosition;
+    
+    humanBullets[i].decrementBulletYPosition = false;
+    
+  }
+  
+  for (int i = 0; i<powerUps.length;i++) {
+    powerUps[i] = new Bullet();
+    powerUps[i].bulletXPosition = width+10;
+    powerUps[i].bulletYPosition = height+10;
+    
+    powerUps[i].incrementPowerUpYPosition = false;
+    
+  }
+  
+  powerUp = "None";
+  
+  
+ 
+
+
+}
+
+
+
+void draw() {
+  background(0);
+  fill(255); 
+  
+  text("Power-Up: " + powerUp, 40, height/2);
+  
+  
+  human.checkForCollisionWithWalls();
+  human.travelDownwards();
+
+  human.moveHuman();
+  human.moveAlien();
+  
+  for (int i=0; i<humanBullets.length & !finished; i++) {
+    humanBullets[i].checkForColllisionWithAlien(humanBullets[i]);
+    humanBullets[i].moveBullet(humanBullets[i]);
+  }
+  
+  for (int i=0; i<powerUps.length & !finished; i++) {
+    if (powerUps[i].incrementPowerUpYPosition) {
+      powerUps[i].checkForPowerUpCollisionWithHuman(i);
+      powerUps[i].movePowerUp(i);
+      
+    }
+  }
+  
+  
+  
+  
+  
+  if (numberOfInvaders==0) {
+     numberOfInvaders--;
+  } else if (numberOfInvaders<0) {
+    fill(255); text("human wins!", 40, 50);
+    String stopGame = input.next();
+  }
+  
+}
+
+
+
+void mousePressed() {
+  boolean finished = false;
+  
+  for (int i=0; i<humanBullets.length && !finished; i++) {
+    //if (numberOfInvadersKilled>7) {
+     if (!humanBullets[i].decrementBulletYPosition) {
+    
+    humanBullets[i].bulletXPosition = humanXPosition;
+    humanBullets[i].bulletYPosition = humanYPosition;
+    humanBullets[i].decrementBulletYPosition = true;
+    
+    finished = true;
+     if (numberOfInvadersKilled>7) {
+    humanBullets[i+1].bulletXPosition = humanXPosition+PADDLEWIDTH;
+    humanBullets[i+1].bulletYPosition = humanYPosition;
+    humanBullets[i+1].decrementBulletYPosition = true;
+    //fill(255, 0, 0); rect (width/4, height/8, alienWidth, alienHeight);
+    }
+    }
+    
+    
+    //}
+    }
+}
