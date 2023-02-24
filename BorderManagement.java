@@ -1,3 +1,5 @@
+//playing around with frames, panels and border layout attributes
+
 
 import javax.swing.JFrame;
 import javax.swing.JPanel;
