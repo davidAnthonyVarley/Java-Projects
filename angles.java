@@ -5,14 +5,19 @@ package small_projects;
 //it is correct up to 12 decimal points of accuracy, which is at least equivalent to (1/ 10billion) if im correct
 
 import java.lang.Math;
+import java.util.ArrayList;
 
 public class angles {
 
 	public static void main(String[] args) {
 		angles a = new angles();
 		
-		System.out.println(a.calcAngle(1, 1, 0) );
-		a.basic_angle();
+		//System.out.println(a.calcsideAngles(3, 0, 1) );
+		
+		ArrayList<Double> angles = a.calcsideAngles(3, 0, 1);
+		
+		double ratio =  angles.get(1) / angles.get(0);
+		//a.basic_angle();
 
 	}
 	
@@ -24,6 +29,7 @@ public class angles {
 		
 		
 		for (int i=0; i<1; i++) {
+			
 			double lengthA=i+1;
 			double lengthC;
 			//lengthC = hypotenuse, lengthB = opposite, lengthA= adjacent
@@ -70,8 +76,14 @@ public class angles {
 		
 	}
 	
+	//5000 so it doesn't get mixed up with any valid angles initially
 	
-	public double calcAngle(int block_x, int block_y, int block_z) {
+	//will be used to save half of angle calculations
+	static double insideAngle =5000;
+	
+	//i have saved as ints because doubles will take up more space
+	//however, this adds an extra 3 unneccessary commands 
+	public static double calcInsideAngle(int block_x, int block_y, int block_z) {
 		
 		double b_x = (double) block_x;
 		double b_y = (double) block_y;
@@ -113,7 +125,7 @@ public class angles {
 			  / |
 			 /	|									(by)
 			/	|								  /
-		c   /	|	a				           /  |
+		c  /	|	a				           /  |
 		  /	    |					        /     |
 		 /		|					   e /        |d
 		/_______|					  /		      |
@@ -155,15 +167,86 @@ public class angles {
 		
 		double cosH = ( (g*g) + (e*e) - (h*h) ) / (2*g*e);
 		double resultRadians = Math.acos(cosH);
-		double angleFromPlayerToBlock= Math.toDegrees(resultRadians);
 		
-		return angleFromPlayerToBlock;
+		double insideAngleFromPlayerToBlock= Math.toDegrees(resultRadians);
+		
+		return insideAngleFromPlayerToBlock;
+		
 	}
 	
 	
+	
+	public ArrayList<Double> calcsideAngles(int block_x, int block_y, int block_z) {
+		//angle documentation is angle above
+		
+		
+		if (insideAngle==5000) {
+			insideAngle= calcInsideAngle(block_x, block_y, block_z);
+		}
+		
+		
+		double b_x = (double) block_x;
+		double b_y = (double) block_y;
+		double b_z = (double) block_z;
+		
+		//player co-ords
+		double px=0;
+		double py=0;
+		double pz=0;
+		
+		
+		//the angle on the inside of the block, in relation to the player
+		// if the player is 3, 3, 3 and the block is 4,4,4
+		// the inside is the left side of the block
+		// and vice versa for blocks on the other side
+		
+		//to find the outside angle, just find the first triangle, formed using the x, z co-ords and 
+		//add 1 to the x, or b
+		
+		//we are finding the angle literally one block to the left/right
+		
+
+		//because this angle is formed using the abs value, we don't need to do -1 for the opposite direction
+		// i think anyway
+		double a = Math.abs(b_z-pz);
+		double b = Math.abs(b_x-px) +1;
+		double c = Math.sqrt( (a*a) + (b*b) );
+		
+		//we have c
+		double d = Math.abs(b_y -py -1); //we want the angle from the bottom to top of block, so -1
+		double e = Math.sqrt( (c*c) + (d*d) );
+
+		double f = d+1;
+		double h=1;
+		double g = Math.sqrt( (c*c) + (f*f) );
+		
+		double cosH = ( (g*g) + (e*e) - (h*h) ) / (2*g*e);
+		double resultRadians = Math.acos(cosH);
+		
+		double outsideAngleFromPlayerToBlock= Math.toDegrees(resultRadians);
+		
+		ArrayList<Double> angles = new ArrayList<Double>();
+		angles.add(insideAngle);
+		angles.add(outsideAngleFromPlayerToBlock);
+		
+		//by changing the value of insideAngle here, it will not change the value of angles[0] above
+		//because that is an new, individual variable, and not a pointer to insideAngle
+		insideAngle = outsideAngleFromPlayerToBlock;
+		
+		
+		return angles;
+	}
 	
 	
 	
 	
 
 }
+
+
+
+
+
+
+
+
