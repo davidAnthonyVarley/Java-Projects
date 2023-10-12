@@ -1,0 +1,74 @@
+funcs to test
+
+DONE
+dll constructor
+	reg constructor 
+
+done
+dllnode constructor
+	reg constructor
+	constructor with null null null
+
+done
+delete
+	delete valid node
+	delete invalid node
+	
+done
+deleteAt
+	check positive out of bounds node
+	check neg out of bounds node
+
+DONE
+makeUnique
+	run with strings, chars, ints, bools, generic
+	empty list
+	neg int list
+	
+
+it'll be grand
+pointTo
+	check positive out of bounds node
+	check neg out of bounds node
+	check reg bounds
+
+done
+insertBefore
+	done
+
+DONE
+insertFirst
+	copy insertBefore //done
+
+DONE
+insertLast
+	copy insertBefore
+
+done
+get
+	check positive out of bounds node
+	check neg out of bounds node
+	check reg bounds
+
+DONE
+isEmpty
+	check with not empty and empty  chars, strings, neg + pos ints, bools, generic
+
+DONE
+reverse
+	empty
+	with chars, strings, neg + pos ints, bools, generic
+
+DONE
+toString
+	with chars, strings, neg + pos ints, bools, generic
+	empty
+
+
+
+
+
+
+
+
+
