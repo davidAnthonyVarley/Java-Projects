@@ -1,14 +1,21 @@
 
 
 void setup() {
-  size(1000, 1000);  
+  size(400, 400);  
 }
 
 void draw() {
-  background(#BB00FF);
+  background(#5b006e);
   noStroke();
-  fill(#BBBB00);
-  ellipse(width/2, height/2, 300, 300);
+  int val =  #FFCC00;//#A4FF92;//#BBBB00
   
-  rect(width/2 - 50, 0, 100, height);
+  fill(val);
+  stroke(0);
+  ellipse(width/2, height/2, 200, 200);
+  
+  rect(width/2 - 40, 0, 80, height);
+  noStroke();
+  ellipse(width/2, height/2, 200, 200);
+  
+  noLoop();
 }
